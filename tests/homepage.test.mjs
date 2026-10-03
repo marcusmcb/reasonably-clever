@@ -1,8 +1,89 @@
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import test from 'node:test';
+import { runInNewContext } from 'node:vm';
 
 const html = await readFile(new URL('../dist/index.html', import.meta.url), 'utf8');
+const themeScript = await readFile(new URL('../dist/theme.js', import.meta.url), 'utf8');
+
+function themeHarness({ saved = null, dark = false, blocked = false } = {}) {
+  const events = {};
+  const attributes = {};
+  const warnings = [];
+  const root = { dataset: {} };
+  const button = {
+    hidden: true,
+    setAttribute: (name, value) => { attributes[name] = value; },
+    addEventListener: (name, listener) => { events[name] = listener; },
+  };
+  const system = {
+    matches: dark,
+    addEventListener: (name, listener) => { events[`system-${name}`] = listener; },
+  };
+  let stored = saved;
+  runInNewContext(themeScript, {
+    document: {
+      documentElement: root,
+      querySelectorAll: () => [],
+      querySelector: () => button,
+      addEventListener: (name, listener) => { events[name] = listener; },
+    },
+    window: {
+      matchMedia: () => system,
+      addEventListener: (name, listener) => { events[name] = listener; },
+      localStorage: {
+        getItem: () => {
+          if (blocked) throw new Error('Storage blocked');
+          return stored;
+        },
+        setItem: (_key, value) => {
+          if (blocked) throw new Error('Storage blocked');
+          stored = value;
+        },
+      },
+    },
+    console: { warn: (...args) => warnings.push(args), error: assert.fail },
+  });
+  return { root, button, system, attributes, warnings, events, stored: () => stored };
+}
+
+test('theme initializes before DOM readiness, follows system, then persists a manual override', () => {
+  const state = themeHarness({ dark: true });
+  assert.equal(state.root.dataset.theme, 'dark');
+  assert.equal(state.button.hidden, true);
+  state.events.DOMContentLoaded();
+  assert.equal(state.button.hidden, false);
+  assert.equal(state.attributes['aria-label'], 'Use light mode');
+  state.system.matches = false;
+  state.events['system-change']();
+  assert.equal(state.root.dataset.theme, 'light');
+  state.events.click();
+  assert.equal(state.stored(), 'dark');
+  assert.equal(state.attributes['aria-pressed'], 'true');
+  state.events['system-change']();
+  assert.equal(state.root.dataset.theme, 'dark');
+  assert.equal(themeHarness({ saved: state.stored(), dark: false }).root.dataset.theme, 'dark');
+});
+
+test('saved light theme overrides dark device preference and storage events synchronize tabs', () => {
+  const state = themeHarness({ saved: 'light', dark: true });
+  assert.equal(state.root.dataset.theme, 'light');
+  state.events.storage({ key: 'reasonably-clever-theme', newValue: 'dark' });
+  assert.equal(state.root.dataset.theme, 'dark');
+  state.events.storage({ key: 'reasonably-clever-theme', newValue: null });
+  state.system.matches = false;
+  state.events['system-change']();
+  assert.equal(state.root.dataset.theme, 'light');
+  assert.equal(themeHarness({ saved: 'invalid', dark: true }).root.dataset.theme, 'dark');
+});
+
+test('blocked storage still allows switching and reports the failure', () => {
+  const state = themeHarness({ blocked: true });
+  state.events.DOMContentLoaded();
+  state.events.click();
+  assert.equal(state.root.dataset.theme, 'dark');
+  assert.equal(state.warnings.length, 2);
+});
 
 test('homepage is a static, accessible English document', () => {
   assert.match(html, /<html lang="en">/);
@@ -12,7 +93,7 @@ test('homepage is a static, accessible English document', () => {
   assert.equal((html.match(/<h1(?:\s|>)/g) ?? []).length, 1);
   assert.match(html, /href="#main-content"/);
   assert.match(html, /<main id="main-content">/);
-  assert.doesNotMatch(html, /<script(?:\s|>)/);
+  assert.match(html, /<script src="\/theme.js"><\/script>/);
 });
 
 test('all supplied homepage sections and cards are rendered', () => {
@@ -62,13 +143,16 @@ test('production assets include local fonts and responsive styles', async () => 
   assert.match(css, /prefers-color-scheme:\s*dark/);
 });
 
-test('automatic theme covers brand assets and browser metadata without scripts', async () => {
+test('theme control covers brand assets and browser metadata', async () => {
   assert.match(html, /name="color-scheme" content="light dark"/);
   assert.match(html, /name="theme-color" content="#1B2723" media="\(prefers-color-scheme: dark\)"/);
   assert.match(html, /class="brand-mark-course"/);
-  const favicon = await readFile(new URL('../dist/favicon.svg', import.meta.url), 'utf8');
-  assert.match(favicon, /prefers-color-scheme:\s*dark/);
-  assert.doesNotMatch(html, /<script(?:\s|>)/);
+  assert.match(html, /class="theme-toggle"/);
+  assert.match(html, /aria-label="Use dark mode"/);
+  const favicon = await readFile(new URL('../dist/favicon-dark.svg', import.meta.url), 'utf8');
+  assert.match(favicon, /#fbf9f3/);
+  const script = await readFile(new URL('../dist/theme.js', import.meta.url), 'utf8');
+  assert.match(script, /localStorage.setItem/);
 });
 
 test('light and dark palette text pairings meet small-text contrast of 4.5:1', async () => {

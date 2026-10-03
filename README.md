@@ -1,8 +1,8 @@
 # Reasonably Clever
 
 The static website for Reasonably Clever's product strategy, design, and engineering services.
-Built with Astro, TypeScript, and plain CSS. The homepage ships no client-side JavaScript,
-uses self-hosted fonts, and does not need an API, database, or server runtime.
+Built with Astro, TypeScript, and plain CSS. A small framework-free script powers the
+theme toggle. The site uses self-hosted fonts and does not need an API, database, or server runtime.
 
 Built and designed by Marcus & Tami McBride, 2026. Made in California.
 
@@ -53,9 +53,16 @@ keyboard-focus and hover states.
 
 ### Dark mode
 
-The site automatically follows the device's light/dark preference using
-`prefers-color-scheme`. There is no theme toggle, saved preference, or theme script.
-Changes to the device preference apply without reloading the page.
+The small sun/moon control in the upper right switches between light and dark mode.
+The site follows the device preference until the visitor chooses a theme, then saves
+that choice in local storage under `reasonably-clever-theme` for future visits.
+The choice overrides later device changes and synchronizes across open tabs.
+Clearing that storage entry restores automatic device preference.
+
+The script in `public/theme.js` applies the saved theme before the page renders to avoid
+a flash of the wrong palette. If storage is blocked, the control still works for the
+current visit and logs a warning. Without JavaScript the control is hidden and CSS
+continues to follow the device preference.
 
 Dark mode follows the supplied dark design layers: `#1B2723` hero and cards,
 `#111A17` services background, `#FBF9F3` headings and brand marks, and `#9FB0AA`

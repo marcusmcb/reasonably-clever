@@ -87,9 +87,53 @@ ol {
   transform: translateY(0);
 }
 
-a:focus-visible {
+a:focus-visible,
+button:focus-visible {
   outline: 3px solid var(--color-ink);
   outline-offset: 5px;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 24px;
+  right: max(var(--page-gutter), calc((100% - 1200px) / 2));
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  border: 1px solid var(--color-body);
+  border-radius: 50%;
+  color: var(--color-ink);
+  background: var(--color-page);
+  cursor: pointer;
+}
+
+.theme-toggle[hidden] {
+  display: none;
+}
+
+.theme-toggle:hover {
+  background: var(--color-surface);
+}
+
+.theme-icon {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.theme-icon--sun,
+.theme-toggle[aria-pressed="true"] .theme-icon--moon {
+  display: none;
+}
+
+.theme-toggle[aria-pressed="true"] .theme-icon--sun {
+  display: block;
 }
 
 .hero {
@@ -337,7 +381,7 @@ a:focus-visible {
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     color-scheme: dark;
     --color-ink: #fbf9f3;
     --color-brand-ink: #fbf9f3;
@@ -348,6 +392,18 @@ a:focus-visible {
     --color-eyebrow: #66bfb3;
     --color-badge: #117a70;
   }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-ink: #fbf9f3;
+  --color-brand-ink: #fbf9f3;
+  --color-body: #9fb0aa;
+  --color-page: #1b2723;
+  --color-card: #1b2723;
+  --color-surface: #111a17;
+  --color-eyebrow: #66bfb3;
+  --color-badge: #117a70;
 }
 
 @media (max-width: 1100px) {
