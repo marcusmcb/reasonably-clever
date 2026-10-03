@@ -1,0 +1,14 @@
+---
+interface Props {
+  location?: 'hero' | 'footer';
+}
+
+const { location = 'hero' } = Astro.props;
+---
+
+<a
+  class:list={['contact-link', { 'contact-link--footer': location === 'footer' }]}
+  href="mailto:reasonablyclever@gmail.com"
+>
+  Say hello!
+</a>

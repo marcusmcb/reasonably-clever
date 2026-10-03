@@ -1,0 +1,99 @@
+---
+import BrandLogo from '../components/BrandLogo.astro';
+import ContactLink from '../components/ContactLink.astro';
+import PrincipleCard from '../components/PrincipleCard.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import SiteLayout from '../layouts/SiteLayout.astro';
+
+const services = [
+  {
+    title: 'Product Strategy',
+    description: 'We help you decide what’s worth building before anyone writes a line of code, or a slide.',
+  },
+  {
+    title: 'Design',
+    description: 'UX and UI grounded in the people who’ll actually use it, not the trend of the month.',
+  },
+  {
+    title: 'Engineering',
+    description: 'We build what we design. No handoff, no telephone game between strategy and ship.',
+  },
+];
+
+const principles = [
+  {
+    title: 'We use our expertise instead of performing it.',
+    description: 'The best work just works, quietly enough that people assume it was obvious all along.',
+  },
+  {
+    title: 'Strategy earns its keep through execution.',
+    description: 'We think it through and build it; ideas that stop at recommendations are the ones that die.',
+  },
+  {
+    title: 'We take the problem seriously and ourselves lightly.',
+    description: 'Confidence and humor are the same trait for us.',
+  },
+  {
+    title: 'Small and direct beats big and layered.',
+    description: 'You talk to the people actually doing the work.',
+  },
+];
+---
+
+<SiteLayout>
+  <main id="main-content">
+    <section class="hero" aria-labelledby="hero-heading">
+      <div class="container hero-content">
+        <BrandLogo />
+        <h1 id="hero-heading">We start with you, not whatever’s trending.</h1>
+        <div class="hero-copy">
+          <p>
+            Product strategy, design, and engineering under one roof, human-centered from
+            the first sketch to the shipped product.
+          </p>
+          <p>
+            You walk away understanding why, not just what. We'd love to take more credit
+            for how obvious that sounds.
+          </p>
+        </div>
+        <ContactLink />
+      </div>
+    </section>
+
+    <section class="services section" aria-labelledby="services-heading">
+      <div class="container section-content">
+        <p class="eyebrow">Services</p>
+        <h2 id="services-heading">What we do</h2>
+        <ul class="services-grid" role="list">
+          {services.map((service) => <ServiceCard {...service} />)}
+        </ul>
+        <p class="services-summary">
+          Human-centered work that leaves you smarter than we found you.
+        </p>
+      </div>
+    </section>
+
+    <section class="principles section" aria-labelledby="principles-heading">
+      <div class="container section-content">
+        <p class="eyebrow">How we work</p>
+        <h2 id="principles-heading">Four things we believe</h2>
+        <ol class="principles-grid" role="list">
+          {principles.map((principle, index) => (
+            <PrincipleCard number={index + 1} {...principle} />
+          ))}
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <footer class="contact" aria-labelledby="contact-heading">
+    <div class="container contact-content">
+      <h2 id="contact-heading">Let’s talk.</h2>
+      <p class="contact-copy">
+        Tell us what you’re building. We’ll tell you honestly whether we’re the right fit.
+      </p>
+      <ContactLink location="footer" />
+      <p class="copyright">© Reasonably Clever, LLC</p>
+    </div>
+  </footer>
+</SiteLayout>

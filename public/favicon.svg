@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 80">
+  <style>
+    .course { fill: #172321; stroke: #fff; }
+    @media (prefers-color-scheme: dark) {
+      .course { fill: #fbf9f3; stroke: #1b2723; }
+    }
+  </style>
+  <rect y="10" width="85" height="26" fill="#0FA092"/>
+  <rect class="course" x="16" y="38" width="85" height="26" rx="1" stroke-width="6" paint-order="stroke fill" transform="rotate(-7.96 58.5 51)"/>
+</svg>
