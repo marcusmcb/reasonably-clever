@@ -122,7 +122,7 @@ test('all supplied homepage sections and cards are rendered', () => {
 });
 
 test('both calls to action open the approved email destination', () => {
-  assert.equal((html.match(/href="mailto:reasonablyclever@gmail.com"/g) ?? []).length, 2);
+  assert.equal((html.match(/href="mailto:reasonablycleverstudio@gmail.com"/g) ?? []).length, 2);
   assert.equal((html.match(/Say hello!/g) ?? []).length, 2);
   assert.doesNotMatch(html, /href="#"/);
 });
